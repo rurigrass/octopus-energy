@@ -1,22 +1,54 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { IAccount } from "../typings";
+
+interface IState {
+  account: IAccount;
+  mpan: string;
+  elecSerial: string;
+}
 
 function App() {
-  const apiKey = "sk_live_NttNvo5ijXNPfYE92RhDruFL";
-  const url = "https://api.octopus.energy/v1/accounts/A-B8EB5983/";
-  const productsUrl = "https://api.octopus.energy/v1/products";
-  const consumption = `https://api.octopus.energy/v1/electricity-meter-points/< MPAN >/meters/< meter serial number >/consumption/?page_size=100&period_from=2020-03-29T00:00Z&period_to=2020-03-29T01:29Z&order_by=period`
-
-  const userAction = async () => {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Basic ${btoa(apiKey + ":")}`,
-      },
-    })
-    const myJson = await response.json(); // Extract JSON from the HTTP response
-    console.log(myJson); // Do something with myJson
+  const initialState = {
+    account: {},
+    mpan: "",
+    elecSerial: "",
   };
 
-  
+  const [state, setState] = useState(initialState);
+  const { account, mpan, elecSerial } = state;
+
+  const apiKey = import.meta.env.VITE_API_KEY;
+  const accountNumber = import.meta.env.VITE_ACCOUNT_NUMBER;
+  const url = `https://api.octopus.energy/v1/accounts/${accountNumber}/`;
+  const productsUrl = "https://api.octopus.energy/v1/products";
+
+  const consumption = `https://api.octopus.energy/v1/electricity-meter-points/${mpan}/meters/${elecSerial}/consumption/?page_size=100&period_from=2023-03-29T00:00Z&period_to=2023-03-29T01:29Z&order_by=period`;
+
+  // const [account, setAccount] = useState<IAccount>();
+
+  useEffect(() => {
+    const getAccount = async () => {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Basic ${window.btoa(apiKey + ":")}`,
+        },
+      });
+      const data: IAccount = await response.json(); // Extract JSON from the HTTP response
+      if (data) {
+        setState((state) => ({
+          ...state,
+          account: data,
+          mpan: data.properties[0].electricity_meter_points[0].mpan,
+          elecSerial:
+            data.properties[0].electricity_meter_points[0].meters[0]
+              .serial_number,
+        }));
+      }
+    };
+    getAccount();
+  }, []);
+
+  console.log(state);
 
   // const userAction = async () => {
   //   fetch(url, {
@@ -29,12 +61,10 @@ function App() {
   //     .catch((error) => console.error(error));
   // };
 
-  userAction();
-
   return (
     <div>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <p className="text-xl text-blue-300"> poo yes</p>
+      <p className="text-xl text-blue-300"> poo yes </p>
     </div>
   );
 }
