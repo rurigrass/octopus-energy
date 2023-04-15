@@ -28,21 +28,25 @@ function App() {
 
   useEffect(() => {
     const getAccount = async () => {
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Basic ${window.btoa(apiKey + ":")}`,
-        },
-      });
-      const data: IAccount = await response.json(); // Extract JSON from the HTTP response
-      if (data) {
-        setState((state) => ({
-          ...state,
-          account: data,
-          mpan: data.properties[0].electricity_meter_points[0].mpan,
-          elecSerial:
-            data.properties[0].electricity_meter_points[0].meters[0]
-              .serial_number,
-        }));
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Basic ${window.btoa(apiKey + ":")}`,
+          },
+        });
+        const data: IAccount = await response.json(); // Extract JSON from the HTTP response
+        if (data) {
+          setState({
+            ...state,
+            account: data,
+            mpan: data.properties[0].electricity_meter_points[0].mpan,
+            elecSerial:
+              data.properties[0].electricity_meter_points[0].meters[0]
+                .serial_number,
+          });
+        }
+      } catch (error) {
+        console.error(error);
       }
     };
     getAccount();
