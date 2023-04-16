@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { IAccount } from "../typings";
 
-interface IState {
-  account: IAccount;
-  mpan: string;
-  elecSerial: string;
-}
+// interface IState {
+//   account: IAccount;
+//   mpan: string;
+//   elecSerial: string;
+// }
 
 function App() {
   const initialState = {
