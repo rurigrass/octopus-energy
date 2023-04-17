@@ -25,6 +25,8 @@ function App() {
   const consumption = `https://api.octopus.energy/v1/electricity-meter-points/${mpan}/meters/${elecSerial}/consumption/?page_size=100&period_from=2023-03-29T00:00Z&period_to=2023-03-29T01:29Z&order_by=period`;
 
   // const [account, setAccount] = useState<IAccount>();
+  const [fetchError, setFetchError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getAccount = async () => {
@@ -34,19 +36,21 @@ function App() {
             Authorization: `Basic ${window.btoa(apiKey + ":")}`,
           },
         });
+        if (!response.ok) throw Error("did not receive expected data");
         const data: IAccount = await response.json(); // Extract JSON from the HTTP response
-        if (data) {
-          setState({
-            ...state,
-            account: data,
-            mpan: data.properties[0].electricity_meter_points[0].mpan,
-            elecSerial:
-              data.properties[0].electricity_meter_points[0].meters[0]
-                .serial_number,
-          });
-        }
-      } catch (error) {
-        console.error(error);
+        setState({
+          ...state,
+          account: data,
+          mpan: data.properties[0].electricity_meter_points[0].mpan,
+          elecSerial:
+            data.properties[0].electricity_meter_points[0].meters[0]
+              .serial_number,
+        });
+        setFetchError(null);
+      } catch (error: any) {
+        setFetchError(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     getAccount();
@@ -54,21 +58,14 @@ function App() {
 
   console.log(state);
 
-  // const userAction = async () => {
-  //   fetch(url, {
-  //     headers: {
-  //       Authorization: `Basic ${btoa(apiKey + ":")}`,
-  //     },
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => console.log(data))
-  //     .catch((error) => console.error(error));
-  // };
-
   return (
     <div>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <p className="text-xl text-blue-300"> poo yes </p>
+      {isLoading && <p>Loading ...</p>}
+      {fetchError && (
+        <p className=" text-red-500 font-bold">{`Error: ${fetchError}`}</p>
+      )}
+      {!fetchError && !isLoading && <p>MPAN: {mpan}</p>}
     </div>
   );
 }
