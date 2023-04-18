@@ -22,7 +22,7 @@ function App() {
   const url = `https://api.octopus.energy/v1/accounts/${accountNumber}/`;
   const productsUrl = "https://api.octopus.energy/v1/products";
 
-  const consumption = `https://api.octopus.energy/v1/electricity-meter-points/${mpan}/meters/${elecSerial}/consumption/?page_size=100&period_from=2023-03-29T00:00Z&period_to=2023-03-29T01:29Z&order_by=period`;
+  const consumptionUrl = `https://api.octopus.energy/v1/electricity-meter-points/${mpan}/meters/${elecSerial}/consumption/?page_size=100&period_from=2023-03-29T00:00Z&period_to=2023-03-29T01:29Z&order_by=period`;
 
   // const [account, setAccount] = useState<IAccount>();
   const [fetchError, setFetchError] = useState(null);
@@ -56,7 +56,24 @@ function App() {
     getAccount();
   }, []);
 
-  console.log(state);
+  useEffect(() => {
+    const getConsumption = async () => {
+      try {
+        const response = await fetch(consumptionUrl, {
+          headers: {
+            Authorization: `Basic ${window.btoa(apiKey + ":")}`,
+          },
+        });
+        const data = await response.json();
+        console.log("consumption", data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (mpan !== "" && elecSerial !== "") getConsumption();
+  }, [mpan, elecSerial]);
+
+  // console.log(state);
 
   return (
     <div>
