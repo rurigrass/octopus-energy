@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { IAccount } from "../typings";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { getAccount } from "./hooks/getAccount";
 
 interface IState {
@@ -31,6 +30,9 @@ function App() {
   // const [isLoading, setIsLoading] = useState(true);
 
   const { data, isLoading } = getAccount(apiKey, accountNumber);
+
+  console.log(data);
+  
   // setState({ ...state, account: data });
 
   // useEffect(() => {
